@@ -1,8 +1,11 @@
+import Header from "@/components/main/MainHeader";
 import MainExploreContainer from "@/components/main/MainExploreContainer";
 
 export default function Main() {
   return (
     <main>
+      <Header />
+
       <section className="bg-gradient-to-b from-indigo-100 to-white">
         <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6 py-20 text-center">
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-indigo-800">
@@ -120,7 +123,7 @@ export default function Main() {
           title="Land Discoveries 🌱"
           subtitle="Land, Nature &amp; Agriculture"
           description="Hands-on activities about nature, agriculture, environment, and ecology on land for budding naturalists and environmental scientists."
-          bgColor="bg-green-50"  
+          bgColor="bg-green-50"
         />
       </section>
 
@@ -129,7 +132,7 @@ export default function Main() {
           title="Ocean/Water Explorers 🌊"
           subtitle="Marine &amp; Underwater Ecology"
           description="Exploration-based learning focused on marine life, ocean science, and environmental conservation for future marine biologists."
-          bgColor="bg-cyan-50"  
+          bgColor="bg-cyan-50"
         />
       </section>
 
