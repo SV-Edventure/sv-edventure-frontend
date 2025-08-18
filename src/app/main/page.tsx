@@ -1,216 +1,371 @@
+"use client";
+
+import { useState } from 'react';
 import Header from "@/components/main/MainHeader";
-import MainExploreContainer from "@/components/main/MainExploreContainer";
+import Footer from "@/components/main/MainFooter";
+import HeroSection from "@/components/main/HeroSection";
+import CategoryTabs from '@/components/main/CategoryTabs';
+import FilterPanel from '@/components/main/ActivityFilterPanel';
+import ActivityTypeFilter from '@/components/main/ActivityTypeFilter';
+import TechGiantEducationSection from "@/components/main/TechGiantEducationSection";
+import VolunteerProgramSection from "@/components/main/VolunteerProgramSection";
+import ActivityGrid from "@/components/main/ActivityGrid";
+import ActivityDetailPage from './[ActivityId]/page';
+import { MapView } from '@/components/main/MapView';
+import { ActivityProps } from '@/components/main/ActivityCard';
+import { Map, Globe } from 'lucide-react';
 
 export default function Main() {
+
+  const [showDetailPage, setShowDetailPage] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityProps | undefined>(undefined);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [activeCategory, setActiveCategory] = useState<string>('any');
+
+
+  const skyActivities: ActivityProps[] = [{
+    id: 'sky-1',
+    title: 'Guided tour of NASA Ames Research Center with a mini talk from a scientist',
+    location: 'Mountain View, CA',
+    price: 25,
+    rating: 5.0,
+    reviewCount: 32,
+    imageUrl: 'https://images.unsplash.com/photo-1454789548928-9efd52dc4031?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 10,
+    date: 'TUE, AUG 6',
+    time: '10:00 AM',
+    ageRange: '8-12',
+    category: 'Space',
+    coordinates: [37.41, -122.0648],
+    sponsorLogo: "/pasted-image.png"
+  }, {
+    id: 'sky-2',
+    title: 'Air Show experiences at Moffett Field and Salinas Air Show',
+    location: 'Moffett Field, CA',
+    price: 29,
+    rating: 5.0,
+    reviewCount: 24,
+    imageUrl: 'https://images.unsplash.com/photo-1533486509112-9ddd21d4a392?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 10,
+    date: 'WED, AUG 7',
+    time: '9:00 AM',
+    ageRange: '6-14',
+    category: 'Aviation',
+    coordinates: [37.416, -122.049],
+    isFree: true
+  }, {
+    id: 'sky-3',
+    title: 'Drone coding and flight workshops, including FPV drone racing',
+    location: 'San Jose, CA',
+    price: 28,
+    rating: 4.9,
+    reviewCount: 18,
+    imageUrl: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 7,
+    date: 'THU, AUG 8',
+    time: '1:00 PM',
+    ageRange: '10-14',
+    category: 'Coding',
+    coordinates: [37.3382, -121.8863] // San Jose coordinates
+  }, {
+    id: 'sky-4',
+    title: 'Stargazing programs at Lick Observatory and Foothill College',
+    location: 'San Jose, CA',
+    price: 29,
+    rating: 5.0,
+    reviewCount: 42,
+    imageUrl: 'https://images.unsplash.com/photo-1472162072942-cd5147eb3902?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 6,
+    date: 'FRI, AUG 9',
+    time: '8:00 PM',
+    ageRange: '8-14',
+    category: 'Astronomy',
+    coordinates: [37.3412, -121.6429],
+    isFree: true,
+    sponsorLogo: "/image.png"
+  }, {
+    id: 'sky-5',
+    title: 'Model rocket building and launch STEM camp',
+    location: 'Sunnyvale, CA',
+    price: 24,
+    rating: 4.98,
+    reviewCount: 56,
+    imageUrl: 'https://images.unsplash.com/photo-1518124880310-14f4ed096a75?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 12,
+    date: 'SAT, AUG 10',
+    time: '10:00 AM',
+    ageRange: '9-12',
+    category: 'STEM',
+    coordinates: [37.3688, -122.0363] // Sunnyvale coordinates
+  }, {
+    id: 'sky-6',
+    title: 'Glider or light aircraft flight experience',
+    location: 'Palo Alto, CA',
+    price: 29,
+    rating: 4.95,
+    reviewCount: 23,
+    imageUrl: 'https://images.unsplash.com/photo-1464755590399-9a10aaad26e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 9,
+    date: 'SUN, AUG 11',
+    time: '11:00 AM',
+    ageRange: '12-14',
+    category: 'Aviation',
+    coordinates: [37.4419, -122.143],
+    sponsorLogo: "/image.png"
+  }, {
+    id: 'sky-7',
+    title: 'Weather balloon launch and tracking adventure',
+    location: 'Los Altos, CA',
+    price: 27,
+    rating: 4.93,
+    reviewCount: 15,
+    imageUrl: 'https://images.unsplash.com/photo-1534481016308-0fca71578ae5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 1,
+    date: 'MON, AUG 12',
+    time: '9:00 AM',
+    ageRange: '10-14',
+    category: 'Science',
+    coordinates: [37.3852, -122.1141],
+    isFree: true
+  }];
+  const seaActivities: ActivityProps[] = [{
+    id: 'sea-1',
+    title: 'Special educational programs at the Monterey Bay Aquarium',
+    location: 'Monterey, CA',
+    price: 26,
+    rating: 4.97,
+    reviewCount: 64,
+    imageUrl: 'https://images.unsplash.com/photo-1582967788606-a171c1080cb0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 8,
+    date: 'TUE, AUG 6',
+    time: '9:30 AM',
+    ageRange: '6-12',
+    category: 'Marine',
+    coordinates: [36.6182, -121.9019] // Monterey Bay Aquarium coordinates
+  }, {
+    id: 'sea-2',
+    title: 'Tide pool exploration at Half Moon Bay and Fitzgerald Marine Reserve',
+    location: 'Half Moon Bay, CA',
+    price: 22,
+    rating: 4.9,
+    reviewCount: 42,
+    imageUrl: 'https://images.unsplash.com/photo-1530538095376-a4936b35b5f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 5,
+    date: 'WED, AUG 7',
+    time: '10:00 AM',
+    ageRange: '6-10',
+    category: 'Ecology',
+    coordinates: [37.4636, -122.4286],
+    isFree: true
+  }, {
+    id: 'sea-3',
+    title: 'Marine drone (ROV) building workshops',
+    location: 'Santa Cruz, CA',
+    price: 28,
+    rating: 4.95,
+    reviewCount: 28,
+    imageUrl: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 10,
+    date: 'THU, AUG 8',
+    time: '1:00 PM',
+    ageRange: '10-14',
+    category: 'Engineering',
+    coordinates: [36.9741, -122.0308] // Santa Cruz coordinates
+  }, {
+    id: 'sea-4',
+    title: 'Introductory sailing classes (Junior Sailing Camp)',
+    location: 'Redwood City, CA',
+    price: 29,
+    rating: 4.93,
+    reviewCount: 35,
+    imageUrl: 'https://images.unsplash.com/photo-1534294228306-bd54eb9a7ba8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 3,
+    date: 'FRI, AUG 9',
+    time: '9:00 AM',
+    ageRange: '8-14',
+    category: 'Sailing',
+    coordinates: [37.507, -122.211] // Redwood City coordinates
+  }, {
+    id: 'sea-5',
+    title: 'Beach cleanup volunteer work combined with ocean conservation education',
+    location: 'Santa Cruz, CA',
+    price: 15,
+    rating: 4.98,
+    reviewCount: 89,
+    imageUrl: 'https://images.unsplash.com/photo-1520333789090-1afc82db536a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 4,
+    date: 'SAT, AUG 10',
+    time: '8:00 AM',
+    ageRange: '6-14',
+    category: 'Conservation',
+    isFree: true,
+    coordinates: [36.9628, -122.0194] // Santa Cruz Beach coordinates
+  }, {
+    id: 'sea-6',
+    title: 'Surfing or snorkeling basics in a wave pool',
+    location: 'Santa Clara, CA',
+    price: 27,
+    rating: 4.9,
+    reviewCount: 52,
+    imageUrl: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 6,
+    date: 'SUN, AUG 11',
+    time: '11:00 AM',
+    ageRange: '8-12',
+    category: 'Water Sports',
+    coordinates: [37.3541, -121.9552],
+    isFree: true
+  }];
+  const groundActivities: ActivityProps[] = [{
+    id: 'ground-1',
+    title: 'U-pick farm experiences for cherries, strawberries, and apples',
+    location: 'Brentwood, CA',
+    price: 19,
+    rating: 4.9,
+    reviewCount: 74,
+    imageUrl: 'https://images.unsplash.com/photo-1464219789935-c2d9d9aba644?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 4,
+    date: 'TUE, AUG 6',
+    time: '9:00 AM',
+    ageRange: '6-12',
+    category: 'Agriculture',
+    coordinates: [37.9319, -121.6957],
+    isFree: true
+  }, {
+    id: 'ground-2',
+    title: 'Hidden Villa educational farm: animal care and vegetable gardening',
+    location: 'Los Altos Hills, CA',
+    price: 24,
+    rating: 4.95,
+    reviewCount: 68,
+    imageUrl: 'https://images.unsplash.com/photo-1559060567-7d88c29f1e83?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 6,
+    date: 'WED, AUG 7',
+    time: '10:00 AM',
+    ageRange: '6-10',
+    category: 'Farming',
+    coordinates: [37.3796, -122.1375] // Los Altos Hills coordinates
+  }, {
+    id: 'ground-3',
+    title: 'Hiking & nature exploration at Rancho San Antonio and Almaden Quicksilver',
+    location: 'Los Altos, CA',
+    price: 18,
+    rating: 4.98,
+    reviewCount: 92,
+    imageUrl: 'https://images.unsplash.com/photo-1473773508845-188df298d2d1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 12,
+    date: 'THU, AUG 8',
+    time: '8:00 AM',
+    ageRange: '8-14',
+    category: 'Hiking',
+    coordinates: [37.3323, -122.0872],
+    isFree: true
+  }, {
+    id: 'ground-4',
+    title: 'Rock climbing experiences (indoor & outdoor)',
+    location: 'Sunnyvale, CA',
+    price: 25,
+    rating: 4.9,
+    reviewCount: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1522163182402-834f871fd851?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 8,
+    date: 'FRI, AUG 9',
+    time: '1:00 PM',
+    ageRange: '10-14',
+    category: 'Climbing',
+    coordinates: [37.3688, -122.0363] // Sunnyvale coordinates
+  }, {
+    id: 'ground-5',
+    title: 'Urban gardening & smart farm education',
+    location: 'San Jose, CA',
+    price: 22,
+    rating: 4.85,
+    reviewCount: 38,
+    imageUrl: 'https://images.unsplash.com/photo-1591857177580-dc82b9ac4e1e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 5,
+    date: 'SAT, AUG 10',
+    time: '10:00 AM',
+    ageRange: '6-12',
+    category: 'Gardening',
+    coordinates: [37.3382, -121.8863],
+    isFree: true
+  }, {
+    id: 'ground-6',
+    title: 'Volcano and geology exploration workshops',
+    location: 'Mountain View, CA',
+    price: 24,
+    rating: 4.92,
+    reviewCount: 26,
+    imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
+    duration: 7,
+    date: 'SUN, AUG 11',
+    time: '1:00 PM',
+    ageRange: '8-12',
+    category: 'Geology',
+    coordinates: [37.3861, -122.0839],
+    isFree: true
+  }];
+
+
+  const allActivities = [...skyActivities, ...seaActivities, ...groundActivities];
+  const handleActivityClick = (activity: ActivityProps) => {
+    setSelectedActivity(activity);
+    setShowDetailPage(true);
+  };
+  type Filters = {
+    date?: string;
+    age?: string;
+  };
+  const handleFilter = (filters: Filters) => {
+    console.log('Filters applied:', filters);
+  };
+  const toggleViewMode = (mode: 'list' | 'map') => {
+    setViewMode(mode);
+  };
+  const handleCloseDetailPage = () => {
+    setShowDetailPage(false);
+    setSelectedActivity(undefined);
+  };
+  const handleCategoryFilterChange = (category: string) => {
+    setActiveCategory(category);
+  };
+
   return (
-    <main>
+    <div className="flex flex-col min-h-screen w-full bg-white">
+      {showDetailPage ? <ActivityDetailPage activity={selectedActivity} onClose={handleCloseDetailPage} /> : <>
       <Header />
+      <main className="flex-grow">
+        <HeroSection />
+        <div className="container mx-auto px-2 py-6">
+          <CategoryTabs />
+          <ActivityTypeFilter onFilterChange={handleCategoryFilterChange} />
+          <FilterPanel onFilter={handleFilter} />
 
-      <section className="bg-gradient-to-b from-indigo-100 to-white">
-        <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6 py-20 text-center">
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-indigo-800">
-            Explore Sky, Sea, and Ground
-          </h1>
-          <div className="my-6 h-1 w-24 bg-indigo-500 mx-auto rounded"></div>
-          <p className="text-sm md:text-base text-gray-700 mb-6 max-w-xl mx-auto leading-snug">
-            A local hub for Silicon Valley families, offering real-world STEM adventures,
-            nature explorations, and community activities for curious young minds.
-          </p>
-        </div>
-      </section>
-
-      <section className="py-8">
-        <div className="mx-auto max-w-7xl px-3 sm:px-4 lg:px-6">
-          <div className="flex items-start justify-center gap-12">
-            <button className="group flex flex-col items-center gap-3 focus:outline-none">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-blue-50 text-blue-600 shadow-sm">
-                <span className="text-3xl">📘</span>
-              </span>
-              <span className="text-base font-medium text-gray-900">Learn</span>
-              <span className="mt-1 h-1 w-12 rounded-full bg-black" />
-            </button>
-
-            <button className="group flex flex-col items-center gap-3 text-gray-500 focus:outline-none">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-orange-50 text-orange-400">
-                <span className="text-3xl">🗺️</span>
-              </span>
-              <span className="text-base font-medium">체험</span>
-            </button>
-
-            <button className="group flex flex-col items-center gap-3 text-gray-500 focus:outline-none">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                <span className="text-3xl">🎥</span>
-              </span>
-              <span className="text-base font-medium">Watching</span>
-            </button>
-          </div>
-
-          <div className="mt-8 rounded-2xl border border-gray-200 shadow-sm">
-            <div className="grid grid-cols-4">
-              <div className="flex flex-col justify-center gap-1 p-6 border-r border-gray-200">
-                <p className="text-sm text-gray-500">Activity Type</p>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-900">Select activities</span>
-                  <svg className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" /></svg>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center gap-1 p-6 border-r border-gray-200">
-                <p className="text-sm text-gray-500">Date</p>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-900">Select Date</span>
-                  <svg className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" /></svg>
-                </div>
-              </div>
-
-              <div className="flex flex-col justify-center gap-1 p-6 border-r border-gray-200">
-                <p className="text-sm text-gray-500">Age</p>
-                <div className="mt-1 flex items-center justify-between">
-                  <span className="text-lg font-medium text-gray-900">Select Age</span>
-                  <svg className="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" /></svg>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center p-6">
-                <button className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-white shadow hover:bg-rose-600 focus:outline-none focus:ring-2 focus:ring-rose-400/50">
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                </button>
-              </div>
+          <div className="flex justify-end mb-8">
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+              <button type="button" onClick={() => toggleViewMode('list')} className={`p-2 text-sm font-medium rounded-l-lg flex items-center ${viewMode === 'list' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`} aria-label="List View">
+                <Globe className="h-5 w-5" />
+              </button>
+              <button type="button" onClick={() => toggleViewMode('map')} className={`p-2 text-sm font-medium rounded-r-lg flex items-center ${viewMode === 'map' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'}`} aria-label="Map View">
+                <Map className="h-5 w-5" />
+              </button>
             </div>
           </div>
+
+          {viewMode === 'list' ? <>
+            {/* Unified Grid View of Activities */}
+            <ActivityGrid activities={allActivities} onActivityClick={handleActivityClick} />
+            <TechGiantEducationSection />
+            <VolunteerProgramSection />
+          </> : <div className="mb-16">
+
+            {/* 지도 라이브러리 버전 이슈 <MapView activities={allActivities} onActivityClick={handleActivityClick} /> */}
+          </div>}
+
         </div>
-      </section>
-
-      <section aria-labelledby="weekly-programs" className="py-10">
-        <div className="mx-auto max-w-screen-2xl px-15">
-          <h2 id="weekly-programs" className="text-3xl font-bold">
-            This Week&apos;s Programs
-          </h2>
-          <div className="mt-6 rounded-3xl bg-indigo-50/40 p-4 sm:p-6">
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-              <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-              <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="popular-activities" className="py-10">
-        <div className="mx-auto max-w-screen-2xl px-15">
-          <h2 id="popular-activities" className="text-3xl font-bold">
-            Popular Activities This Month
-          </h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-            <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-            <div className="py-30 border-gray-200 rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="sky" className="py-10">
-        <MainExploreContainer
-          title="Sky Adventures ✈️"
-          subtitle="Air, Space &amp; Aviation"
-          description="STEM + adventure activities inspired by the sky and space. Perfect for young aviators, astronauts, and drone enthusiasts."
-          bgColor="bg-blue-50"
-        />
-      </section>
-
-      <section aria-labelledby="Land" className="py-10">
-        <MainExploreContainer
-          title="Land Discoveries 🌱"
-          subtitle="Land, Nature &amp; Agriculture"
-          description="Hands-on activities about nature, agriculture, environment, and ecology on land for budding naturalists and environmental scientists."
-          bgColor="bg-green-50"
-        />
-      </section>
-
-      <section aria-labelledby="ocean" className="py-10">
-        <MainExploreContainer
-          title="Ocean/Water Explorers 🌊"
-          subtitle="Marine &amp; Underwater Ecology"
-          description="Exploration-based learning focused on marine life, ocean science, and environmental conservation for future marine biologists."
-          bgColor="bg-cyan-50"
-        />
-      </section>
-
-      <section aria-labelledby="tech-programs" className="py-10">
-        <div className="mx-auto max-w-screen-2xl px-10">
-          <div className="p-6 sm:p-10">
-            <div className="flex items-start justify-between">
-              <h2 id="tech-programs" className="text-2xl font-bold text-blue-700">
-                Tech Giants&apos; Educational Programs
-              </h2>
-              <a href="#" className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline">
-                View all programs
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M13 5l7 7-7 7" /></svg>
-              </a>
-            </div>
-
-            <div className="mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-              {[
-                { logo: "", name: "Apple Camp", desc: "Creative tech workshops for kids" },
-                { logo: "Google", name: "Code Next", desc: "Computer science for underrepresented youth" },
-                { logo: "NVIDIA", name: "AI Education", desc: "AI & robotics workshops for students" },
-                { logo: "intel", name: "Future Skills", desc: "STEM education & tech innovation" },
-                { logo: "TESLA", name: "Engineering Days", desc: "EV technology & sustainability programs" },
-                { logo: "NASA", name: "Space Academy", desc: "Space science & exploration for kids" },
-              ].map((b, i) => (
-                <div key={i} className="text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center text-2xl font-semibold">
-                    {b.logo}
-                  </div>
-                  <h3 className="mt-4 font-bold text-lg text-blue-700 mb-2">{b.name}</h3>
-                  <p className="mt-2 text-gray-600 text-sm">{b.desc}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-10 flex justify-center">
-              <a
-                href="#"
-                className="inline-flex items-center justify-center rounded-full bg-blue-100 px-6 py-3 text-sm font-semibold text-blue-800 shadow-sm hover:bg-blue-200"
-              >
-                Find Tech Education Programs Near You
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="volunteer" className="py-12">
-        <div className="mx-auto max-w-screen-2xl px-15">
-          <div className="rounded-3xl bg-amber-50 p-6 sm:p-10">
-            <div className="text-center">
-              <h2 id="volunteer" className="text-3xl font-bold mb-4">
-                Global Volunteer Programs
-              </h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                Make a difference in developing countries through these family-friendly volunteer opportunities.
-                Create lasting memories while helping communities thrive.
-              </p>
-            </div>
-
-            <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">Dummy</div>
-            </div>
-
-            <div className="mt-10 flex justify-center">
-              <a
-                href="#"
-                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-3 px-8 rounded-full transition-all shadow-md hover:shadow-lg"
-              >
-                View All Global Volunteer Programs
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+      </main>
+      <Footer />
+      </>}
+    </div>
   );
 }
