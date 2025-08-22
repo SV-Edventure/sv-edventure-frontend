@@ -9,6 +9,12 @@ interface ProgramImage {
   image: string;
 }
 
+type DirectusProgram = Record<(typeof ProgramFields)[number], unknown>;
+
+function hasData<T>(v: { data: T } | T): v is { data: T } {
+  return typeof v === "object" && v !== null && "data" in v;
+}
+
 function parseError(e: unknown): { status: number; error: unknown } {
   if (typeof e === "object" && e !== null) {
     const errObj = e as { response?: { data?: unknown; status?: number }; message?: string };
@@ -25,30 +31,26 @@ function parseError(e: unknown): { status: number; error: unknown } {
   return { status: 500, error: { message: "unknown error" } };
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_req: Request, context: unknown) {
+  const { params } = context as { params: { id: string } };
   try {
-    const BASE = (process.env.DIRECTUS_URL || process.env.NEXT_PUBLIC_DIRECTUS_URL || "").replace(/\/+$/, "");
-
-    const progRes = await dGet(`/items/program/${params.id}`, {
+    const progRes = await dGet<{ data: DirectusProgram } | DirectusProgram>(`/items/program/${params.id}`, {
       fields: ProgramFields,
     });
-    const program = progRes?.data ?? progRes;
+    const program = hasData(progRes) ? progRes.data : progRes;
     if (!program) {
       return NextResponse.json({ error: { message: "Not found" } }, { status: 404 });
     }
 
-    const imgRes = await dGet("/items/program_images", {
-      filter: { program: { _eq: params.id } },
-      fields: [
-        "id",
-        "image"
-      ],
-    });
-
-    const rawImages: ProgramImage[] = Array.isArray(imgRes?.data) ? imgRes.data : [];
+    const imgRes = await dGet<{ data: ProgramImage[] } | ProgramImage[]>(
+      "/items/program_images",
+      {
+        filter: { program: { _eq: params.id } },
+        fields: ["id", "image"],
+      }
+    );
+    const raw = hasData(imgRes) ? imgRes.data : imgRes;
+    const rawImages: ProgramImage[] = Array.isArray(raw) ? raw : [];
 
     return NextResponse.json({ data: { ...program, rawImages } }, { status: 200 });
   } catch (e: unknown) {
