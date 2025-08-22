@@ -68,7 +68,6 @@ export default function VolunteerProgramsPage() {
           sponsorImage: p.sponsorImage,
           isFree: Boolean(p.isFree),
           websiteUrl: p.websiteUrl,
-          bannerImageUrls: p.bannerImageUrls,
         }));
 
         const volunteers = mapped.filter((p) => p.tag === "volunteer");

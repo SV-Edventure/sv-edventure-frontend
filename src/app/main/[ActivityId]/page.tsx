@@ -75,8 +75,14 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ Activ
           sponsorImage: p.sponsor_image,
           isFree: Boolean(p.is_free),
           websiteUrl: p.website_url,
-          bannerImageUrls: p.rawImages,
         };
+        const rawImagesArr = Array.isArray(p?.rawImages) ? (p.rawImages as Array<{ image?: string | null }>) : [];
+        const fromApi = rawImagesArr
+          .map((ri) => (ri && typeof ri === 'object' ? assetUrl(ri.image ?? null) : null))
+          .filter((u): u is string => Boolean(u));
+        const fallback = p?.image ? assetUrl(p.image) : null;
+        const gallery = fromApi.length > 0 ? fromApi : (fallback ? [fallback] : []);
+        setBannerImages(gallery);
         setProgram(mapped);
       } catch (e) {
         console.error(e);
@@ -86,24 +92,10 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ Activ
   }, [ActivityId]);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [bannerImages, setBannerImages] = useState<string[]>([]);
   const router = useRouter();
 
-  const images: string[] = useMemo(() => {
-    // Support optional bannerImageUrls array or single fallback image id
-    type WithBanners = { bannerImageUrls?: unknown[] };
-    const list = program && Array.isArray((program as WithBanners).bannerImageUrls)
-      ? ((program as WithBanners).bannerImageUrls as unknown[])
-      : [];
-
-    const urlsFromBanners = list
-      .map((it) => extractFileId(it as RawImage))
-      .filter((id): id is string => Boolean(id))
-      .map((id) => assetUrl(id));
-
-    if (urlsFromBanners.length > 0) return urlsFromBanners;
-    if (program?.image) return [assetUrl(program.image)];
-    return [];
-  }, [program]);
+  const images: string[] = bannerImages;
 
   useEffect(() => {
     setCurrentImageIndex(0);

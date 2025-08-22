@@ -47,7 +47,6 @@ export default function Main() {
     sponsor_image?: string | null;
     is_free?: boolean | null;
     website_url?: string | null;
-    banner_image_urls?: unknown;
   };
 
   useEffect(() => {
