@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@directus/visual-editing": "^1.1.0",
+    "axios": "^1.7.7",
+    "html-react-parser": "^5.2.6",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.441.0",
     "next": "15.4.6",
     "react": "19.1.0",
@@ -17,6 +21,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -12,7 +12,7 @@ export default function ActivityTypeFilter({
         name: 'Any category',
         icon: <Star className="h-6 w-6" />
     }, {
-        id: 'groups',
+        id: 'group',
         name: 'New Groups',
         icon: <Users className="h-6 w-6" />
     }, {
@@ -20,11 +20,11 @@ export default function ActivityTypeFilter({
         name: 'Social Activities',
         icon: <PartyPopper className="h-6 w-6" />
     }, {
-        id: 'hobbies',
+        id: 'hobby',
         name: 'Hobbies & Passions',
         icon: <Palette className="h-6 w-6" />
     }, {
-        id: 'sports',
+        id: 'sport',
         name: 'Sports & Fitness',
         icon: <Dumbbell className="h-6 w-6" />
     }, {
