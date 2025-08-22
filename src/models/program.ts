@@ -20,7 +20,6 @@ export interface Program {
     longitude?: string;
     sponsorImage?: string;
     websiteUrl?: string;
-    bannerImageUrls?: string;
     type: string;
 }
 
@@ -47,3 +46,5 @@ export const ProgramFields = [
     "website_url",
     "type",
 ] as const;
+
+export type ProgramField = typeof ProgramFields[number];

@@ -137,10 +137,10 @@ export const MapView = ({ programs, onActivityClick }: MapViewProps) => {
   return (
     <div className="w-full">
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div ref={mapDivRef} className="h-[600px] w-full relative" />
-        <div className="p-4 border-t border-gray-200">
-          <h3 className="font-medium mb-2">Map Legend</h3>
-          <div className="grid grid-cols-3 gap-2">
+        <div ref={mapDivRef} className="h-[700px] w-full relative" />
+        {/* <div className="p-4 border-t border-gray-200"> */}
+          {/* <h3 className="font-medium mb-2">Map Legend</h3> */}
+          {/* <div className="grid grid-cols-3 gap-2">
             <div className="flex items-center">
               <div className="w-4 h-4 rounded-full bg-blue-500 mr-2"></div>
               <span className="text-sm">Sky Activities</span>
@@ -153,8 +153,8 @@ export const MapView = ({ programs, onActivityClick }: MapViewProps) => {
               <div className="w-4 h-4 rounded-full bg-green-500 mr-2"></div>
               <span className="text-sm">Land Activities</span>
             </div>
-          </div>
-        </div>
+          </div> */}
+        {/* </div> */}
       </div>
     </div>
   );

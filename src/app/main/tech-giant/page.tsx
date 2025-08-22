@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from 'next/link';
-import { Program } from '@/models/program';
+import { Program, ProgramFields } from '@/models/program';
 
 const DIRECTUS_BASE = (process.env.NEXT_PUBLIC_DIRECTUS_URL ?? 'http://localhost:8055').replace(/\/+$/, '');
 
@@ -26,12 +26,14 @@ const toImageUrl = (raw: unknown): string | null => {
   return null;
 };
 
+type DirectusListResponse<T> = { data: T[] };
+type DirectusProgram = Record<typeof ProgramFields[number], unknown>;
+
+
 export default function TechGiantEducationPage() {
   const [bigPrograms, setBigPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
-    type DirectusListResponse<T> = { data: T[] };
-
     const numOrUndef = (v: unknown): number | undefined =>
       v === null || v === undefined || (typeof v === "string" && v.trim() === "")
         ? undefined
@@ -41,39 +43,47 @@ export default function TechGiantEducationPage() {
       v === null || v === undefined ? "" : String(v);
 
     fetch("/api/program", { cache: "no-store" })
-      .then((res) => res.json() as Promise<DirectusListResponse<Program>>)
+      .then((res) => res.json() as Promise<DirectusListResponse<DirectusProgram>>)
       .then((json) => {
-        const mapped: Program[] = (json?.data ?? []).map((p: any) => {
-          const priceNum = numOrUndef(p.price);
-          const adultPriceNum = numOrUndef(p.adultPrice);
-          const durationNum = numOrUndef(p.duration);
-          const ageMinNorm = numOrUndef(p.age_min);
-          const ageMaxNorm = numOrUndef(p.age_max);
+        const mapped: Program[] = (json?.data ?? []).map((p: DirectusProgram) => {
+          const numOrUndef = (v: unknown): number | undefined =>
+            v === null || v === undefined || (typeof v === "string" && v.trim() === "")
+              ? undefined
+              : Number(v);
 
-          return {
-            id: Number(p.id),
-            title: strOrEmpty(p.title),
-            subtitle: p.subtitle,
-            tag: p.tag ?? null,
-            description: p.description ?? null,
-            feature: p.feature ?? "",
-            type: p.type ?? "",
-            category: p.category ?? "",
-            location: strOrEmpty(p.location),
+          const strOrEmpty = (v: unknown): string =>
+            v === null || v === undefined ? "" : String(v);
+
+          const priceNum = numOrUndef(p["price"]);
+          const adultPriceNum = numOrUndef(p["adult_price"]);
+          const durationNum = numOrUndef(p["duration"]);
+          const ageMinNorm = numOrUndef(p["age_min"]);
+          const ageMaxNorm = numOrUndef(p["age_max"]);
+
+          const program: Program = {
+            id: Number(p["id"]),
+            title: strOrEmpty(p["title"]),
+            subtitle: (p["subtitle"] as string | undefined) ?? undefined,
+            tag: strOrEmpty(p["tag"]),
+            description: strOrEmpty(p["description"]),
+            feature: strOrEmpty(p["feature"]),
+            type: strOrEmpty(p["type"]),
+            category: strOrEmpty(p["category"]),
+            location: strOrEmpty(p["location"]),
             price: priceNum ?? 0,
             adultPrice: adultPriceNum ?? 0,
-            image: p.image ?? null,
+            image: strOrEmpty(p["image"]),
             duration: durationNum ?? 0,
-            startAt: (p.startAt ?? null) as string | null,
+            startAt: strOrEmpty(p["start_at"]),
             ageMin: ageMinNorm,
-            ageMax: ageMaxNorm ?? null,
-            longitude: strOrEmpty(p.longitude),
-            latitude: strOrEmpty(p.latitude),
-            sponsorImage: p.sponsorImage ?? null,
-            isFree: Boolean(p.isFree),
-            websiteUrl: p.websiteUrl ?? null,
-            bannerImageUrls: p.bannerImageUrls ?? [],
-          } as Program;
+            ageMax: ageMaxNorm,
+            longitude: strOrEmpty(p["longitude"]),
+            latitude: strOrEmpty(p["latitude"]),
+            sponsorImage: strOrEmpty(p["sponsor_image"]),
+            isFree: Boolean(p["is_free"]),
+            websiteUrl: strOrEmpty(p["website_url"]),
+          };
+          return program;
         });
 
         const bigs = mapped.filter((p) => p.tag === "big");

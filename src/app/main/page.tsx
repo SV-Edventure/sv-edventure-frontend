@@ -11,7 +11,7 @@ import TechGiantEducationSection from "@/components/tech-giant/TechGiantEducatio
 import VolunteerProgramSection from "@/components/volunteer/VolunteerProgramSection";
 import ActivityGrid from "@/components/main/ActivityGrid";
 import { Map, Globe } from 'lucide-react';
-import { Program, ProgramFields} from "@/models/program"
+import { Program } from "@/models/program"
 import dynamic from "next/dynamic";
 export default function Main() {
 
@@ -24,57 +24,63 @@ export default function Main() {
   const [volunteerPrograms, setVolunteerPrograms] = useState<Program[]>([]);
   const [bigPrograms, setBigPrograms] = useState<Program[]>([]);
 
+  type DirectusListResponse<T> = { data: T[] };
+  type DirectusProgram = {
+    id: number | string;
+    tag?: string | null;
+    title?: string | null;
+    subtitle?: string | null;
+    description?: string | null;
+    feature?: string | null;
+    type?: string | null;
+    category?: string | null;
+    location?: string | null;
+    price?: number | string | null;
+    adult_price?: number | string | null;
+    image?: string | null;
+    duration?: number | string | null;
+    start_at?: string | null;
+    age_min?: number | string | null;
+    age_max?: number | string | null;
+    latitude?: string | null;
+    longitude?: string | null;
+    sponsor_image?: string | null;
+    is_free?: boolean | null;
+    website_url?: string | null;
+    banner_image_urls?: unknown;
+  };
+
   useEffect(() => {
-    type DirectusListResponse<T> = { data: T[] };
-
     fetch("/api/program", { cache: "no-store" })
-      .then((res) => res.json() as Promise<DirectusListResponse<Program>>)
+      .then((res) => res.json() as Promise<DirectusListResponse<DirectusProgram>>)
       .then((json) => {
-        // helper: convert number-like values; keep undefined if null/undefined
-        const numOrUndef = (v: unknown): number | undefined =>
-          v === null || v === undefined || (typeof v === "string" && v.trim() === "")
-            ? undefined
-            : Number(v);
+        const mapped: Program[] = (json?.data ?? []).map((p: DirectusProgram) => ({
+          id: Number(p.id),
+          title: p.title ?? "",
+          subtitle: p.subtitle ?? undefined,
+          tag: p.tag ?? "",
+          description: p.description ?? "",
+          feature: p.feature ?? "",
+          type: p.type ?? "",
+          category: p.category ?? "",
+          location: p.location ?? "",
+          price: p.price != null ? Number(p.price) : 0,
+          adultPrice: p.adult_price != null ? Number(p.adult_price) : 0,
+          image: p.image ?? "",
+          duration: p.duration != null ? Number(p.duration) : 0,
+          startAt: p.start_at ?? "",
+          ageMin: p.age_min != null ? Number(p.age_min) : undefined,
+          ageMax: p.age_max != null ? Number(p.age_max) : undefined,
+          longitude: p.longitude ?? "",
+          latitude: p.latitude ?? "",
+          sponsorImage: p.sponsor_image ?? "",
+          isFree: Boolean(p.is_free ?? false),
+          websiteUrl: p.website_url ?? "",
+        }));
 
-        const strOrEmpty = (v: unknown): string =>
-          v === null || v === undefined ? "" : String(v);
-
-        const mapped: Program[] = (json?.data ?? []).map((p: any) => {
-          const priceNum = numOrUndef(p.price);
-          const adultPriceNum = numOrUndef(p.adultPrice);
-          const durationNum = numOrUndef(p.duration);
-          const ageMinNorm = numOrUndef(p.age_min);
-          const ageMaxNorm = numOrUndef(p.age_max);
-
-          return {
-            id: Number(p.id),
-            title: strOrEmpty(p.title),
-            subtitle: p.subtitle,
-            tag: p.tag ?? null,
-            description: p.description ?? null,
-            feature: p.feature ?? "",
-            type: p.type ?? "",
-            category: p.category ?? "",
-            location: strOrEmpty(p.location),
-            price: priceNum ?? 0,
-            adultPrice: adultPriceNum ?? 0,
-            image: p.image ?? null,
-            duration: durationNum ?? 0,
-            startAt: (p.startAt ?? null) as string | null,
-            ageMin: ageMinNorm,
-            ageMax: ageMaxNorm ?? null,
-            longitude: strOrEmpty(p.longitude),
-            latitude: strOrEmpty(p.latitude),
-            sponsorImage: p.sponsorImage ?? null,
-            isFree: Boolean(p.isFree),
-            websiteUrl: p.websiteUrl ?? null,
-            bannerImageUrls: p.bannerImageUrls ?? [],
-          } as Program;
-        });
-
-        const activity = mapped.filter(p => !p.tag || p.tag === "activity");
-        const volunteers = mapped.filter(p => p.tag === "volunteer");
-        const bigs = mapped.filter(p => p.tag === "big");
+        const activity = mapped.filter((p) => !p.tag || p.tag === "activity");
+        const volunteers = mapped.filter((p) => p.tag === "volunteer");
+        const bigs = mapped.filter((p) => p.tag === "big");
 
         setPrograms(activity);
         setVolunteerPrograms(volunteers);
@@ -206,7 +212,7 @@ export default function Main() {
     }
 
     return list;
-  }, [programs, activeCategory, filters]);
+  }, [programs, activeCategory, filters, resolveDateRange]);
 
   const router = useRouter();
   const handleActivityClick = (activityId: number) => {
@@ -245,7 +251,7 @@ export default function Main() {
 
           {viewMode === 'list' ? <>
             <ActivityGrid activities={filteredPrograms} onActivityClick={handleActivityClick} />
-            <TechGiantEducationSection educationPrograms={bigPrograms}/>
+            <TechGiantEducationSection educationPrograms={bigPrograms} />
             <VolunteerProgramSection volunteerPrograms={volunteerPrograms} />
           </> : <div className="mb-16">
             <MapView programs={programs} onActivityClick={handleActivityClick} />
