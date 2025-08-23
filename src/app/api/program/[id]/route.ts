@@ -31,10 +31,13 @@ function parseError(e: unknown): { status: number; error: unknown } {
   return { status: 500, error: { message: "unknown error" } };
 }
 
-export async function GET(_req: Request, context: unknown) {
-  const { params } = context as { params: { id: string } };
+export async function GET(
+  _req: Request,
+  ctx: { params: Promise<{ id: string }> }
+) {
+  const { id } = await ctx.params;
   try {
-    const progRes = await dGet<{ data: DirectusProgram } | DirectusProgram>(`/items/program/${params.id}`, {
+    const progRes = await dGet<{ data: DirectusProgram } | DirectusProgram>(`/items/program/${id}`, {
       fields: ProgramFields,
     });
     const program = hasData(progRes) ? progRes.data : progRes;
@@ -45,7 +48,7 @@ export async function GET(_req: Request, context: unknown) {
     const imgRes = await dGet<{ data: ProgramImage[] } | ProgramImage[]>(
       "/items/program_images",
       {
-        filter: { program: { _eq: params.id } },
+        filter: { program: { _eq: id } },
         fields: ["id", "image"],
       }
     );
