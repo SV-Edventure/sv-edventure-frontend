@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Search,
   ChevronDown,
@@ -35,14 +35,41 @@ interface AgeOption {
 
 interface FilterPanelProps {
   onFilter: (filters: PanelFilters) => void
+  /** 초기 렌더 때 기본 필터값. 미지정 시 날짜는 'today'로 시작 */
+  initialFilters?: PanelFilters
 }
 
-export const ActivityFilterPanel = ({ onFilter }: FilterPanelProps) => {
+export const ActivityFilterPanel = ({ onFilter, initialFilters }: FilterPanelProps) => {
+  const ageGroups: AgeOption[] = [
+    { id: 'age-0-3', name: '0-3세', min: 0, max: 3 },
+    { id: 'age-4-6', name: '4-6세', min: 4, max: 6 },
+    { id: 'age-7-9', name: '7-9세', min: 7, max: 9 },
+    { id: 'age-10-12', name: '10-12세', min: 10, max: 12 },
+    { id: 'age-all', name: 'All', min: null, max: null },
+  ]
+
+  const deriveAgeId = (age: AgeRange | null | undefined): string => {
+    if (!age) return ''
+    const found = ageGroups.find(a => a.min === age.min && a.max === age.max)
+    return found ? found.id : ''
+  }
+
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState<string>(initialFilters?.date ?? 'today')
   const [selectedCalendarDate, setSelectedCalendarDate] = useState<string>('')
-  const [selectedAge, setSelectedAge] = useState<string>('')
-  const [selectedTime, setSelectedTime] = useState<number>(12)
+  const [selectedAge, setSelectedAge] = useState<string>(deriveAgeId(initialFilters?.age))
+  const [selectedTime, setSelectedTime] = useState<number>(() => {
+    // initialFilters?.time is a label like "12:00 PM"; slider uses 0~24 in 0.5 increments
+    if (!initialFilters?.time) return 12
+    const m = initialFilters.time.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i)
+    if (!m) return 12
+    let h = parseInt(m[1], 10)
+    const min = parseInt(m[2], 10)
+    const ap = m[3].toUpperCase()
+    if (ap === 'PM' && h !== 12) h += 12
+    if (ap === 'AM' && h === 12) h = 0
+    return h + (min / 60)
+  })
 
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
@@ -54,6 +81,16 @@ export const ActivityFilterPanel = ({ onFilter }: FilterPanelProps) => {
     { id: 'tomorrow', name: '내일', subtext: `${currentMonth + 1}월 ${new Date().getDate() + 1}일` },
     { id: 'weekend', name: '이번 주말', subtext: `${currentMonth + 1}월 ${getWeekendDates()}` },
   ]
+
+  useEffect(() => {
+    const selectedGroup = ageGroups.find((a) => a.id === selectedAge)
+    const ageFilter: AgeRange | null = selectedGroup && selectedGroup.min !== null
+      ? { min: selectedGroup.min, max: selectedGroup.max }
+      : null
+    const dateVal = selectedDate === 'all' ? undefined : (selectedDate || selectedCalendarDate || undefined)
+    onFilter({ date: dateVal, age: ageFilter, time: formatTime(selectedTime) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function getWeekendDates(): string {
     const today = new Date()
@@ -67,13 +104,6 @@ export const ActivityFilterPanel = ({ onFilter }: FilterPanelProps) => {
     return `${friday.getDate()}일~${sunday.getDate()}일`
   }
 
-  const ageGroups: AgeOption[] = [
-    { id: 'age-0-3', name: '0-3세', min: 0, max: 3 },
-    { id: 'age-4-6', name: '4-6세', min: 4, max: 6 },
-    { id: 'age-7-9', name: '7-9세', min: 7, max: 9 },
-    { id: 'age-10-12', name: '10-12세', min: 10, max: 12 },
-    { id: 'age-all', name: 'All', min: null, max: null },
-  ]
 
   const toggleCategory = (categoryId: string): void => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId)

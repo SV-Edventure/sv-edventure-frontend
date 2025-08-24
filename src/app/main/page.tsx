@@ -99,7 +99,7 @@ export default function Main() {
     return () => { teardown?.(); };
   }, [programs.length]);
 
-  const [filters, setFilters] = useState<PanelFilters>({ age: null });
+  const [filters, setFilters] = useState<PanelFilters>({ age: null, date: 'today' });
 
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [activeCategory, setActiveCategory] = useState<string>('any');
